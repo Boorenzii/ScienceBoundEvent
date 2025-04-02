@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>May 1st Event Cost Calculator</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        
+        h1, h2, h3 {
+            color: #0066cc;
+        }
+        
+        .calculator-container {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .input-group {
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .input-group label {
+            width: 150px;
+            font-weight: bold;
+        }
+        
+        input[type="number"], select {
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            width: 250px;
+        }
+        
+        button {
+            background-color: #0066cc;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+            font-size: 14px;
+        }
+        
+        button:hover {
+            background-color: #0055aa;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        
+        th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+        
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        
+        .category-header {
+            background-color: #e6f2ff;
+            font-weight: bold;
+        }
+        
+        .total-row {
+            font-weight: bold;
+            background-color: #f2f2f2;
+        }
+        
+        .tab-container {
+            margin-top: 20px;
+        }
+        
+        .tab-buttons {
+            display: flex;
+        }
+        
+        .tab-button {
+            padding: 10px 20px;
+            background-color: #e2e2e2;
+            border: none;
+            cursor: pointer;
+            margin-right: 2px;
+        }
+        
+        .tab-button.active {
+            background-color: white;
+            border-top: 2px solid #0066cc;
+        }
+        
+        .tab-content {
+            display: none;
+            padding: 20px;
+            background-color: white;
+            border-top: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .export-buttons {
+            margin: 20px 0;
+        }
+
+        .product-selection {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f8f8f8;
+            border-radius: 5px;
+        }
+
+        .product-section {
+            margin-bottom: 20px;
+        }
+
+        .product-section h3 {
+            margin-bottom: 10px;
+            padding-bottom: 5px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .selection-group {
+            margin-bottom: 10px;
+            padding: 5px 0;
+        }
+
+        .price-display {
+            margin-left: 10px;
+            color: #666;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <h1>May 1st Event Cost Calculator</h1>
+    
+    <div class="calculator-container">
+        <h2>Event Configuration</h2>
+        
+        <div class="input-group">
+            <label for="attendance">Expected Attendance:</label>
+            <input type="number" id="attendance" value="80" min="10" max="500">
+        </div>
+        
+        <div class="input-group">
+            <label for="servings-per-person">Servings Per Person:</label>
+            <input type="number" id="servings-per-person" value="1.5" min="0.5" max="3" step="0.1">
+            <span style="margin-left: 10px; color: #666;">(Hot dogs/hamburgers per person)</span>
+        </div>
+        
+        <div class="input-group">
+            <label for="drinks-per-person">Drinks Per Person:</label>
+            <input type="number" id="drinks-per-person" value="2" min="1" max="5" step="0.5">
+        </div>
+        
+        <div class="product-selection">
+            <h2>Product Selection</h2>
+            
+            <div class="product-section">
+                <h3>Hot Dogs</h3>
+                <div class="selection-group">
+                    <label for="hotdog-type">Hot Dog Type:</label>
+                    <select id="hotdog-type">
+                        <option value="ball-park-classic" data-price="6.98" data-servings="24">Ball Park Classic Original Length Hot Dogs, 24 ct. ($6.98)</option>
+                        <option value="ball-park-beef" data-price="10.98" data-servings="24" selected>Ball Park Beef Franks, 24 ct. ($10.98)</option>
+                        <option value="nathans" data-price="9.71" data-servings="24">Nathan's Famous Beef Franks, 24 ct. ($9.71)</option>
+                        <option value="members-mark-cheddar" data-price="8.64" data-servings="12">Member's Mark Cheddar Cheese Pork Franks, 12 ct. ($8.64)</option>
+                    </select>
+                </div>
+                
+                <div class="selection-group">
+                    <label for="hotdog-bun-type">Hot Dog Bun Type:</label>
+                    <select id="hotdog-bun-type">
+                        <option value="sara-lee-hotdog" data-price="3.58" data-servings="16" selected>Sara Lee Restaurant Style White Hot Dog Buns, 16 ct. ($3.58)</option>
+                        <option value="lakeland-hotdog" data-price="3.78" data-servings="16">Lakeland Hot Dog Buns, 16 ct. ($3.78)</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="product-section">
+                <h3>Hamburgers</h3>
+                <div class="selection-group">
+                    <label for="burger-type">Hamburger Type:</label>
+                    <select id="burger-type">
+                        <option value="ground-beef-sliders" data-price="5.48" data-servings="4" data-per-pound="true" selected>Member's Mark Prime Rib Ground Beef Sliders, priced per pound ($5.48/lb)</option>
+                        <option value="quick-n-eat" data-price="18.98" data-servings="12">Quick 'N Eat Flame Grilled Angus Beef Patties, 12 ct. ($18.98)</option>
+                        <option value="don-lee-farms" data-price="19.48" data-servings="12">Don Lee Farms Flame Grilled Angus Choice Beef Patties, 12 ct. ($19.48)</option>
+                        <option value="members-mark-8020" data-price="25.98" data-servings="18">Member's Mark 80/20 Ground Angus Beef Patties, 18 ct. ($25.98)</option>
+                        <option value="members-mark-8515" data-price="26.98" data-servings="18">Member's Mark 85/15 Ground Sirloin Beef Patties, 18 ct. ($26.98)</option>
+                    </select>
+                </div>
+                
+                <div class="selection-group">
+                    <label for="burger-bun-type">Hamburger Bun Type:</label>
+                    <select id="burger-bun-type">
+                        <option value="sara-lee-burger" data-price="3.78" data-servings="16" selected>Sara Lee Restaurant Style White Hamburger Buns, 16 ct. ($3.78)</option>
+                        <option value="lakeland-burger" data-price="3.78" data-servings="16">Lakeland Hamburger Buns, 16 ct. ($3.78)</option>
+                        <option value="brownberry-hawaiian" data-price="5.78" data-servings="16">Brownberry Hawaiian Hamburger Buns, 16 ct. ($5.78)</option>
+                        <option value="brioche-slider" data-price="6.98" data-servings="24">Member's Mark Sliced Brioche Slider Buns, 24 ct. ($6.98)</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="product-section">
+                <h3>Beverages</h3>
+                <div class="selection-group">
+                    <label for="beverage-option">Beverage Options:</label>
+                    <select id="beverage-option">
+                        <option value="water-only">Water Only</option>
+                        <option value="mixed-beverages" selected>Mixed Beverages</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        
+        <button id="calculate-btn" style="margin-top: 20px;">Calculate Costs</button>
+        
+        <div id="results-container" style="margin-top: 20px;">
+            <h2>Cost Calculation Results</h2>
+            
+            <div style="background-color: #e6f2ff; padding: 15px; border-radius: 5px; margin-bottom: 20px;">
+                <h3 style="margin-top: 0;">Summary</h3>
+                <p><strong>Total Cost:</strong> <span id="total-cost">$0.00</span></p>
+                <p><strong>Cost Per Person:</strong> <span id="cost-per-person">$0.00</span></p>
+            </div>
+            
+            <div class="tab-container">
+                <div class="tab-buttons">
+                    <button class="tab-button active" data-tab="itemized">Itemized Breakdown</button>
+                    <button class="tab-button" data-tab="category">Category Summary</button>
+                    <button class="tab-button" data-tab="comparison">Attendance Comparison</button>
+                </div>
+                
+                <div id="itemized-tab" class="tab-content active">
+                    <h3>Itemized Cost Breakdown</h3>
+                    <table id="itemized-table">
+                        <thead>
+                            <tr>
+                                <th>Category</th>
+                                <th>Item</th>
+                                <th>Unit Price</th>
+                                <th>Quantity</th>
+                                <th>Total</th>
+                                <th>Calculation</th>
+                            </tr>
+                        </thead>
+                        <tbody id="itemized-table-body">
+                            <!-- Will be populated by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div id="category-tab" class="tab-content">
+                    <h3>Category Summary</h3>
+                    <table id="category-summary-table">
+                        <thead>
+                            <tr>
+                                <th>Category</th>
+                                <th>Total Cost</th>
+                            </tr>
+                        </thead>
+                        <tbody id="category-summary-body">
+                            <!-- Will be populated by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div id="comparison-tab" class="tab-content">
+                    <h3>Cost Comparison by Attendance</h3>
+                    <p>The calculator generates custom costs based on your specific selections. Here's a comparison of estimated costs for different attendance levels using your current product selections:</p>
+                    
+                    <table id="comparison-table">
+                        <thead>
+                            <tr>
+                                <th>Attendance</th>
+                                <th>Total Cost</th>
+                                <th>Cost Per Person</th>
+                                <th>Hot Dogs</th>
+                                <th>Hamburgers</th>
+                                <th>Toppings</th>
+                                <th>Beverages</th>
+                                <th>Snacks</th>
+                            </tr>
+                        </thead>
+                        <tbody id="comparison-table-body">
+                            <!-- Will be populated by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <div class="export-buttons">
+                <button id="export-excel-btn">Export to Excel</button>
+                <button id="export-csv-btn">Export to CSV</button>
+                <button id="copy-table-btn">Copy Table for Excel</button>
+            </div>
+        </div>
+    </div>
+    
+    <script src="Event.js"></script>
+</body>
+</html>
